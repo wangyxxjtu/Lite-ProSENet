@@ -16,12 +16,11 @@ for extracting features from the CT scans. The backbone of ProSENet is a 3D Resn
 ### Data Prepration
 We considered 422 NSCLC patients from TCIA to assess the proposed framework, download from [here](https:)
 
-### 🌻 Training
+### 🌻 Training and testing
 ```
 sh train.sh
+python test.py
 ```
-
-### 🌻 Testing
 
 ## Citation
 If you think this repo useful, please cite
