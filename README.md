@@ -4,7 +4,7 @@ The officie pytorch code of our paper [Multimodal Learning for Non-small Cell Lu
 ## Introduction
 The Illustration of PCNet:
 
-<img src="https://github.com/wangyxxjtu/Lite-ProSENet/figures/framework.png" width="845" alt="workflow" />
+<img src="https://github.com/wangyxxjtu/Lite-ProSENet/blob/main/figures/framework.png" width="845" alt="workflow" />
 
 ### Overview
 
