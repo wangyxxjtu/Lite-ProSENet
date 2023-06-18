@@ -22,6 +22,10 @@ sh train.sh
 python test.py
 ```
 
+## Performance
+Our model can acheive STOA performance on practical dataset:
+<img src="https://github.com/wangyxxjtu/Lite-ProSENet/blob/main/figures/performance.png" width="845" alt="workflow" />
+
 ## Citation
 If you think this repo useful, please cite
 ```
