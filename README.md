@@ -11,6 +11,13 @@ The Illustration of PCNet:
 This paper focuses on the task of survival time analysis for lung cancer. Although much progress has been made in this problem in recent years, the performance of existing methods is still far from satisfactory. Traditional and some deep learning- based survival time analyses for lung cancer are mostly based on textual clinical information such as staging, age, histology, etc. Unlike existing methods that predicting on the single modality, we observe that a human clinician usually takes multimodal data\ such as text clinical data and visual scans to estimate survival time. Motivated by this, in this work, we contribute a smart cross-modality network for survival analysis network named Lite-ProSENet that simulates a human’s manner of decision making. To be specific, Lite-ProSENet is a two-tower architecture that takes the clinical data and the CT scans as inputs to create the survival prediction. The textural tower is responsible for modelling the clinical data, we build a light transformer using multi-head self-attention as our textural tower. The visual tower (namely ProSENet) is responsible
 for extracting features from the CT scans. The backbone of ProSENet is a 3D Resnet that works together with several repeatable building block named 3D-SE Resblock for a compact feature extraction. Our 3D-SE Resblock is composed of a 3D channel “Squeeze-and-Excitation” (SE) block and a temporal SE block. The purpose of 3D-SE Resblock is to adaptively select the valuable features from CT scans. Besides, to further filter out the redundant information among CT scans, we develop a simple but effective frame difference mechanism that takes the performance of our model to the new state- of-the-art. Extensive experiments were conducted using data from 422 NSCLC patients from The Cancer Imaging Archive (TCIA). The results show that our Lite-ProSENet outperforms favorably again all comparison methods and achieves the new state of the art with the 89.3% on concordance.
 
+#### AUthors:
+* [Yujiao Wu](https://scholar.google.com/citations?user=4t9fSdwAAAAJ&hl=zh-CN)
+* [Yaxiong Wang](https://scholar.google.com/citations?user=lDChiR4AAAAJ&hl=zh-CN)
+* [Xiaoshui Huang](https://xiaoshuihuang.github.io/)
+* [Fan Yang](https://www.linkedin.com/in/fanyang0510/)
+* [Sai Ho Ling](https://ieeexplore.ieee.org/author/37594256300)
+* [Steven Su](https://profiles.uts.edu.au/Steven.Su)
 
 ## Usage
 ### Data Prepration
