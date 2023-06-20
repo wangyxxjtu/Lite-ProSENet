@@ -10,7 +10,7 @@ The officie pytorch code of our paper [Multimodal Learning for Non-small Cell Lu
 * [Steven Su](https://profiles.uts.edu.au/Steven.Su)
 
 ## Introduction
-The Illustration of PCNet:
+The Illustration of Lite-ProSENe:
 
 <img src="https://github.com/wangyxxjtu/Lite-ProSENet/blob/main/figures/framework.png" width="845" alt="workflow" />
 
