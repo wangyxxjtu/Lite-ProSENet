@@ -2,7 +2,7 @@
 The officie pytorch code of our paper [Multimodal Learning for Non-small Cell Lung Cancer Prognosis](https://arxiv.org/pdf/2211.03280.pdf)
 
 #### AUthors:
-* [Yujiao Wu](https://scholar.google.com/citations?user=4t9fSdwAAAAJ&hl=zh-CN)， [Yaxiong Wang](https://scholar.google.com/citations?user=lDChiR4AAAAJ&hl=zh-CN)， [Xiaoshui Huang](https://xiaoshuihuang.github.io/) [Fan Yang](https://www.linkedin.com/in/fanyang0510/)， [Sai Ho Ling](https://ieeexplore.ieee.org/author/37594256300)， [Steven Su](https://profiles.uts.edu.au/Steven.Su)
+* [Yujiao Wu](https://scholar.google.com/citations?user=4t9fSdwAAAAJ&hl=zh-CN), [Yaxiong Wang](https://scholar.google.com/citations?user=lDChiR4AAAAJ&hl=zh-CN), [Xiaoshui Huang](https://xiaoshuihuang.github.io/), [Fan Yang](https://www.linkedin.com/in/fanyang0510/), [Sai Ho Ling](https://ieeexplore.ieee.org/author/37594256300), [Steven Su](https://profiles.uts.edu.au/Steven.Su)
 
 ## Introduction
 The Illustration of Lite-ProSENe:
