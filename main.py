@@ -24,10 +24,7 @@ from model import get_inplanes, BasicBlock, ResNet, Bottleneck
 from lifelines.utils import concordance_index
 import wandb
 
-# print(concordance_index_censored([True,True,False,False,True],[1,2,4,5,3],[1,2,4,3,5]))
-# print(concordance_index([1,2,4,5,3],[1,2,4,3,5],[True,True,False,False,True]))
-
-wandb.init(project='jiabaobao-dualSpatialSE')
+wandb.init(project='Lite-ProTransformer')
 
 random.seed(7)
 np.random.seed(7)
@@ -43,24 +40,33 @@ l1_loss = torch.nn.SmoothL1Loss()
 LOGGER = logging.getLogger(__name__)
 LOGGER.addHandler(logging.NullHandler())
 
-def parse_opts():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--root_path',
-						default=None,
-						type=str,
-						help='Root directory path')
-	parser.add_argument('--annotation_path',
-						default=None,
-						type=str,
-						help='Annotation file path')
-	parser.add_argument('--result_path',
-						default=None,
-						type=str,
-						help='Result directory path')
-	parser.add_argument('--suffix',
-						default=None,
-						type=str,
-						help='Result directory path')
+parser = argparse.ArgumentParser()
+parser.add_argument('--data_root',
+                    default='./data/',
+                    type=str,
+                    help='Root directory path')
+parser.add_argument('--ckpt_path',
+                    default=None,
+                    type=str,
+                    help='Annotation file path')
+parser.add_argument('--result_path',
+                    default='./',
+                    type=str,
+                    help='Result directory path')
+parser.add_argument('--suffix',
+                    default=None,
+                    type=str,
+                    help='Result directory path')
+parser.add_argument('--alpha',
+                    default=0.5,
+                    type=float,
+                    help='trade-off parameter')
+parser.add_argument('--beta',
+                    default=0.5,
+                    type=float,
+                    help='trade-off parameter')
+
+args = parser.parse_args()
 
 
 def train_one_epoch(net, data_loader, entropy_loss, optimizer, exp_lr_scheduler):
@@ -70,17 +76,12 @@ def train_one_epoch(net, data_loader, entropy_loss, optimizer, exp_lr_scheduler)
 	train_loss = 0
 	count = 0
 	net.train()
-	# print(f"data_loader:{data_loader}")
 	correct = 0.0
 	event_c=torch.tensor([],dtype=torch.bool)
 	label_c=torch.tensor([]).to("cuda:0")
 	outputs_c=torch.tensor([]).to("cuda:0")
 	for i, data in enumerate(data_loader):
-		# print(f"i:{1},data:{data}")
 		inputs, clinical, label, event = data
-		# print(clinical.shape,'This is clinical shape')
-		# print(clinical,'This is clinical data')
-		# input the data into this model
 		inputs = inputs.unsqueeze(1)
 		label = label.unsqueeze(1)
 
@@ -89,13 +90,12 @@ def train_one_epoch(net, data_loader, entropy_loss, optimizer, exp_lr_scheduler)
 		label = label.float().to("cuda:0")
 		clinical = clinical.float().to("cuda:0")
 
-
 		outputs, z1, z2 = net(inputs,clinical)
 		# calculate the cross entropy loss
 		loss = entropy_loss(outputs, label) + l1_loss(outputs, label)
 		loss_1 = entropy_loss(z1, label)
 		loss_2 = l1_loss(z2, label)
-		loss_ = loss + 0.5*loss_1 + 0.5*loss_2
+		loss_ = loss + args.alpha*loss_1 + args.beta*loss_2
 		testlabel = label.cpu()
 	
 		# calculate the gradient
@@ -107,39 +107,15 @@ def train_one_epoch(net, data_loader, entropy_loss, optimizer, exp_lr_scheduler)
 
 		train_loss = train_loss + loss_.item()
 		count = count + 1
-		# correct += ((outputs.max(1)[1] == label).sum()).double()
-		# print(outputs.shape, label.shape)
-		# correct += sum(abs(outputs - label))
-		# correct += (abs(outputs - label).sum()).double()
 		correct += torch.sum(torch.abs(outputs - label)).data
-		# print(event,label,outputs)
 		event_c=torch.cat((event_c,event))
 		label_c=torch.cat((label_c,label))
 		outputs_c=torch.cat((outputs_c,outputs))
 
-		# print(concordance_index_censored(event.view(-1).cpu().detach().numpy(),label.view(-1).cpu().detach().numpy(),outputs.view(-1).cpu().detach().numpy())
-# )
-		# print(outputs.max(1)[1])
-	  # print(train_loss/count)
-	# print('training acc is {:.3f}'.format(correct /((i+1)*inputs.shape[0])))
-	# print('training acc is {:.3f}'.format(correct / ((i + 1)*inputs.shape[0])))
-	# print("train epoch %f is finished" % count)
-	#  get the average training loss
-	# accracy = correct/436.0
-	# print(concordance_index_censored(event_c.view(-1).cpu().detach().numpy(), label_c.view(-1).cpu().detach().numpy(),
-	#								   outputs_c.view(-1).cpu().detach().numpy()))
-	# gradurity
-	# label_c = torch.round(torch.div(label_c, 4454/4454)).type(torch.int)
-	# outputs_c = torch.round(torch.div(outputs_c, 4454/4454)).type(torch.int)
-	# print(label_c,outputs_c)
 	ctd = concordance_index_censored(event_c.view(-1).cpu().detach().numpy(), label_c.view(-1).cpu().detach().numpy(),
 									 outputs_c.view(-1).cpu().detach().numpy())
-	# ctd1 = concordance_index(label_c.view(-1).cpu().detach().numpy(),
-	#								   outputs_c.view(-1).cpu().detach().numpy(),event_c.view(-1).cpu().detach().numpy())
-	# accracy = correct/436.0
-	accracy = correct/244.0
+	accracy = correct/len(data_loader.dataset)
 	train_loss = train_loss / count
-	# print('concordance: ', ctd)
 	if (1-ctd[0]) > best_con:
 		best_con = 1 - ctd[0]
 	if accracy < best_acc:
@@ -149,8 +125,6 @@ def train_one_epoch(net, data_loader, entropy_loss, optimizer, exp_lr_scheduler)
 	wandb.log({'Training loss':train_loss})
 	wandb.log({'Lowest MAE':best_acc})
 	print('training loss: %.4f, accuracy= %.4f, concordance = %.4f, current best concordance = %.4f, current lowest MAE = %.4f' % (train_loss, accracy, 1-ctd[0], best_con, best_acc))
-	# print(ctd1)
-	# LOGGER.info('concordance: ', ctd)
 	LOGGER.info('training loss: %.4f, accuracy= %.4f, concordance = %.4f' % (train_loss, accracy, 1-ctd[0]))
 	train_acc = accracy
 
@@ -180,19 +154,10 @@ def validate_one_epoch(net, test_loader, entropy_loss):
 
 		test_loss = test_loss + loss.item()
 		count = count + 1
-		# print(outputs.max(1)[1] )
-		#correct += ((outputs.max(1)[1] == label).sum()).double()
-		#correct += ((outputs.max(1)[1] == label).sum()).float()
-		#correct += torch.sum(torch.abs(outputs - label)).double()
 		correct += torch.sum(torch.abs(outputs - label)).data
-		#print(correct)
-		# correct = 0
-	# print('validate acc is {:.3f}'.format(correct / ((i + 1) * inputs.shape[0])))
-	# get the average testing loss
 
 	val_loss = test_loss / count
-	# val_acc=correct / 124.0
-	val_acc=correct / 77.0
+	val_acc=correct / len(test_loader.dataset)
 
 	print('validate loss: %.4f, accuracy= %.4f' % (val_loss, val_acc))
 	LOGGER.info('validate loss: %.4f, accuracy= %.4f' % (val_loss, val_acc))
@@ -222,8 +187,8 @@ def train():
 	################  load data ##########################
 	batch_size=1
 	workers=2
-	train_path="./data/train"
-	val_path="./data/val"
+	train_path=f"./{args.data_root}/train"
+	val_path=f"./{args.data_root}/val"
 	# path = "/data/yujwu/NSCLC/survival_estimate/survival_est_xh/data/evaluat"
 	#
 	# if phase == "train":
@@ -307,10 +272,10 @@ def train():
 		# save the best model
 		if val_acc1 < best_loss:
 			best_loss=val_acc1
-			torch.save(net.state_dict(), "best.pth")
+			torch.save(net.state_dict(), f"{args.ckpt_path}/best.pth")
 
 		# save the last trained model
-		torch.save(net.state_dict(), "checkpoint.pth")
+		torch.save(net.state_dict(), f"{args.ckpt_path}/checkpoint.pth")
 
 		writer.add_scalar('Loss/train', train_loss, i)
 		writer.add_scalar('Loss/test', val_loss, i)
