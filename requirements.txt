@@ -1,0 +1,11 @@
+lifelines==0.26.0
+matplotlib==2.1.1
+numpy==1.13.3
+pandas==0.22.0
+Pillow==10.4.0
+scikit_survival==0.12.0
+scipy==0.19.1
+SimpleITK==2.4.0
+torch==1.2.0
+torchvision==0.4.0
+wandb==0.13.1
